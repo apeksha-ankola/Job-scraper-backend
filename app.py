@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, session
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 from flask_cors import CORS
 from jobs import get_jobs
 from internships import get_internships
@@ -9,8 +10,17 @@ app.secret_key = "MY_SECRET_KEY"
 CORS(app)  # Enable Cross-Origin Resource Sharing for React frontend
 
 # MongoDB setup
-client = MongoClient("mongodb://localhost:27017/")
+# client = MongoClient("mongodb://localhost:27017/")
+# db = client["jobscraperdb"]
+
+uri = ""    # URL here
+client = MongoClient(uri, server_api=ServerApi('1'))
 db = client["jobscraperdb"]
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
 
 
 @app.post("/signup")
@@ -22,9 +32,10 @@ def signup():
     username = data.get("username")
     password = data.get("password")
     location = data.get("location")
+    phone = data.get("phone")
 
     # Validate required fields
-    if not all([name, email, username, password, location]):
+    if not all([name, email, username, password, location,phone]):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     # Check for unique email and username
@@ -40,6 +51,7 @@ def signup():
         "username": username,
         "password": password,
         "location": location,
+        "phone": phone
     }
     db.users.insert_one(new_user)
 
