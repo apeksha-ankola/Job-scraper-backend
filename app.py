@@ -5,6 +5,10 @@ from flask_cors import CORS
 from jobs import get_jobs
 from internships import get_internships
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 app.secret_key = "MY_SECRET_KEY"  
 CORS(app)  # Enable Cross-Origin Resource Sharing for React frontend
@@ -13,8 +17,8 @@ CORS(app)  # Enable Cross-Origin Resource Sharing for React frontend
 # client = MongoClient("mongodb://localhost:27017/")
 # db = client["jobscraperdb"]
 
-uri = ""    # URL here
-client = MongoClient(uri, server_api=ServerApi('1'))
+url = os.getenv("MONGO_URL")
+client = MongoClient(url, server_api=ServerApi('1'))
 db = client["jobscraperdb"]
 try:
     client.admin.command('ping')
