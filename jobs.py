@@ -73,7 +73,7 @@ def get_jobs_indeed(job_query):
     # Close the browser
     driver.quit()
 
-    # Create a pandas DataFrame
+    # Create a pandasDataFrame
     data = {
         "Job Title": job_titles,
         "Company": companies,

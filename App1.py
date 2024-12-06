@@ -10,6 +10,8 @@ import os
 from dotenv import load_dotenv
 import secrets
 
+#All imports present in requirements.txt
+
 load_dotenv()
 
 app = Flask(__name__)

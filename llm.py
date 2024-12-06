@@ -55,3 +55,5 @@ def generate_resume(name, job_position):
     resume = llm.invoke(resume_prompt)
     pdf_path = save_to_pdf(resume, "Generated Resume", "resume.pdf")
     return pdf_path
+
+#End

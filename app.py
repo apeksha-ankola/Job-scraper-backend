@@ -112,7 +112,7 @@ def jobs():
 
 @app.get("/internships")
 def internships():
-    # Check if the user is logged in
+    # Check if the user is loggedin
     #if "username" not in session:
         #return jsonify({"success": False, "message": "Please login first"}), 401
     

@@ -53,7 +53,7 @@ def get_internships(internship_query):
 
     internship_links = [internship['href'] for internship in internships]
 
-    # If no internships found, return an empty list with a message
+    # If no internships found, return an empty list with a message "Internship not found"
     if not internship_links:
         return {"message": "Internships not found", "data": []}
     
