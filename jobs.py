@@ -193,7 +193,7 @@ def get_jobs_naukri(job_query):
         print(f"An error occurred: {e}")
 
 def get_jobs(query):
-    query = "Machine Learning"
+    #query = "Machine Learning"
     df_indeed = get_jobs_indeed(query)
     df_naukri = get_jobs_naukri(query)
 

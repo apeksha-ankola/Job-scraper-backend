@@ -1,17 +1,19 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, send_file
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from flask_cors import CORS
 from jobs import get_jobs
 from internships import get_internships
+from llm import generate_cover_letter, generate_resume
 
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "MY_SECRET_KEY"  
-CORS(app)  # Enable Cross-Origin Resource Sharing for React frontend
+app.secret_key = "MY_SECRET_KEY" 
+#Modified by ayaj to allwo react app to access it 
+CORS(app, origins=["http://localhost:3000"])  # Enable Cross-Origin Resource Sharing for React frontend
 
 # MongoDB setup
 # client = MongoClient("mongodb://localhost:27017/")
@@ -20,6 +22,7 @@ CORS(app)  # Enable Cross-Origin Resource Sharing for React frontend
 url = os.getenv("MONGO_URL")
 client = MongoClient(url, server_api=ServerApi('1'))
 db = client["jobscraperdb"]
+
 try:
     client.admin.command('ping')
     print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -36,7 +39,7 @@ def signup():
     username = data.get("username")
     password = data.get("password")
     location = data.get("location")
-    phone = data.get("phone")
+    phone = int(data.get("phone"))
 
     # Validate required fields
     if not all([name, email, username, password, location,phone]):
@@ -67,6 +70,7 @@ def signup():
 @app.post("/login")
 def login():
     # Get data from the frontend request
+    print("hey")
     data = request.json  # Expecting JSON input
     username = data.get("username")
     password = data.get("password")
@@ -93,9 +97,10 @@ def logout():
 
 @app.get("/jobs")
 def jobs():
+    print(session)
     # Check if the user is logged in
-    if "username" not in session:
-        return jsonify({"success": False, "message": "Please login first"}), 401
+    #if "username" not in session:
+        #return jsonify({"success": False, "message": "Please login first"}), 401
     
     # Get the search query from request arguments
     search_query = request.args.get("search")
@@ -108,8 +113,8 @@ def jobs():
 @app.get("/internships")
 def internships():
     # Check if the user is logged in
-    if "username" not in session:
-        return jsonify({"success": False, "message": "Please login first"}), 401
+    #if "username" not in session:
+        #return jsonify({"success": False, "message": "Please login first"}), 401
     
     # Get the search query from request arguments
     search_query = request.args.get("search")
@@ -118,6 +123,40 @@ def internships():
     jobs_list = get_internships(search_query)
     
     return jsonify({"success": True, "jobs": jobs_list}), 200
+
+@app.route('/generate-cover-letter', methods=['POST'])
+def generate_cover_letter_route():
+    try:
+        data = request.json
+        name = data.get('name')
+        company_name = data.get('company_name')
+        job_position = data.get('job_position')
+
+        if not all([name, company_name, job_position]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        pdf_path = generate_cover_letter(name, company_name, job_position)
+        return send_file(pdf_path, as_attachment=False, download_name='cover-letter.pdf', mimetype='application/pdf')
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Resume API
+@app.route('/generate-resume', methods=['POST'])
+def generate_resume_route():
+    try:
+        data = request.json
+        name = data.get('name')
+        job_position = data.get('job_position')
+
+        if not all([name, job_position]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        pdf_path = generate_resume(name, job_position)
+        return send_file(pdf_path, as_attachment=False, download_name='resume.pdf', mimetype='application/pdf')
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
