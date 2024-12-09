@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from flask_cors import CORS
 from jobs import get_jobs, get_internships
-from llm import generate_cover_letter, generate_resume
+from llm2 import generate_cover_letter, generate_resume
 
 import os
 from dotenv import load_dotenv
