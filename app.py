@@ -12,12 +12,21 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = "MY_SECRET_KEY" 
 #Modified by ayaj to allwo react app to access it 
-CORS(app, origins=["http://localhost:3000"])  # Enable Cross-Origin Resource Sharing for React frontend
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",  # Allow all origins during development
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "withCredentials": True
+    }
+})  # Enable Cross-Origin Resource Sharing for React frontend
+
 
 # MongoDB setup
 # client = MongoClient("mongodb://localhost:27017/")
 # db = client["jobscraperdb"]
 
+ 
 url = os.getenv("MONGO_URL")
 client = MongoClient(url, server_api=ServerApi('1'))
 db = client["jobscraperdb"]
@@ -37,11 +46,11 @@ def signup():
     email = data.get("email")
     username = data.get("username")
     password = data.get("password")
-    location = data.get("location")
-    phone = int(data.get("phone"))
+    #location = data.get("location")
+    #phone = int(data.get("phone"))
 
     # Validate required fields
-    if not all([name, email, username, password, location,phone]):
+    if not all([name, email, username, password]):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     # Check for unique email and username
@@ -56,11 +65,10 @@ def signup():
         "email": email,
         "username": username,
         "password": password,
-        "location": location,
-        "phone": phone
+        
     }
     db.users.insert_one(new_user)
-
+    print("Entry inserted of username -> ", username)
     # Store username in session
     session["username"] = username
 
@@ -82,16 +90,19 @@ def login():
     
     # Validate the password
     if user["password"] != password:
-        return jsonify({"success": False, "message": "Incorrect username or password"}), 401
+        return jsonify({"success": False, "message": "Incorrect password"}), 401
     
     # Store username in session
     session["username"] = username
+    print(f"Session after login: {dict(session)}")
+    print(f"Username stored in session: {session.get('username')}")
     return jsonify({"success": True, "message": "Login successful", "username": username}), 200
 
 @app.get("/logout")
 def logout():
     # Clear the session
     session.pop("username", None)
+    print("Session after logout:", dict(session))
     return jsonify({"success": True, "message": "Logged out successfully"}), 200
 
 @app.get("/jobs")
@@ -103,7 +114,7 @@ def jobs():
     
     # Get the search query from request arguments
     search_query = request.args.get("search")
-    
+    print("Running Scrapping for Jobs..")
     # Call the get_jobs function and return the results
     jobs_list = get_jobs(search_query)
     
