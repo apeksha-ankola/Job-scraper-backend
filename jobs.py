@@ -60,9 +60,9 @@ def get_internships(query):
         future_internshala = executor.submit(internshala_wrapper, query)
 
         # Collect the results
-        jobs_indeed = future_indeed.result()
-        jobs_naukri = future_naukri.result()
-        jobs_internshala = future_internshala.result()
+        jobs_indeed = future_indeed.result() or []
+        jobs_naukri = future_naukri.result() or []
+        jobs_internshala = future_internshala.result() or []
     
     # Combine the results
     combined_jobs = jobs_indeed + jobs_naukri + jobs_internshala
