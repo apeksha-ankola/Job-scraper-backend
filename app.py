@@ -173,13 +173,14 @@ def update_profile():
     # Get data from the request body
     data = request.json
     username = data.get("username")
+    name = data.get("name")
     phone = data.get("phone")
     github = data.get("github")
     linkedin = data.get("linkedin")
     location = data.get("location")
 
     # Validate required fields
-    if not all([username, phone, github, linkedin, location]):
+    if not all([username, name,phone, github, linkedin, location]):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     # Check if the user exists in the database
@@ -190,6 +191,7 @@ def update_profile():
 
     # Add or update the profile in the user's data
     profile = {
+        "name":name,
         "phone": phone,
         "github": github,
         "linkedin": linkedin,
