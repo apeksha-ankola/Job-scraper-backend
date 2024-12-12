@@ -98,7 +98,10 @@ def login():
     session["username"] = username
     print(f"Session after login: {dict(session)}")
     print(f"Username stored in session: {session.get('username')}")
-    return jsonify({"success": True, "message": "Login successful", "username": username}), 200
+    user.pop("password", None)
+    user.pop("_id", None)
+    print(user)
+    return jsonify({"success": True, "message": "Login successful", "username": username, "userData":user}), 200
 
 @app.get("/logout")
 def logout():
@@ -143,11 +146,15 @@ def generate_cover_letter_route():
         name = data.get('name')
         company_name = data.get('company_name')
         job_position = data.get('job_position')
+        email = data.get('email')
+        linkedin = data.get('linkedin')
+        github = data.get('github')
+        phone = data.get('phone')
 
         if not all([name, company_name, job_position]):
             return jsonify({"error": "Missing required fields"}), 400
-
-        pdf_path = generate_cover_letter(name, company_name, job_position)
+        print(name, email, linkedin, github, phone, company_name)
+        pdf_path = generate_cover_letter(name, company_name, job_position, email, linkedin, github, phone)
         return send_file(pdf_path, as_attachment=False, download_name='cover-letter.pdf', mimetype='application/pdf')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -159,11 +166,14 @@ def generate_resume_route():
         data = request.json
         name = data.get('name')
         job_position = data.get('job_position')
+        email = data.get("email")
+        github = data.get("github")
+        linkedin = data.get("linkedin")
 
         if not all([name, job_position]):
             return jsonify({"error": "Missing required fields"}), 400
 
-        pdf_path = generate_resume(name, job_position)
+        pdf_path = generate_resume(name, job_position,email,github,linkedin)
         return send_file(pdf_path, as_attachment=False, download_name='resume.pdf', mimetype='application/pdf')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -173,7 +183,7 @@ def update_profile():
     # Get data from the request body
     data = request.json
     username = data.get("username")
-    name = data.get("name")
+    name = data.get("fullName")
     phone = data.get("phone")
     github = data.get("github")
     linkedin = data.get("linkedin")
@@ -206,6 +216,7 @@ def update_profile():
 
     # Fetch the updated user document
     updated_user = db.users.find_one({"username": username}, {"_id": 0})
+    updated_user.pop("password")
 
     return jsonify({"success": True, "message": "Profile updated successfully", "user": updated_user}), 200
 

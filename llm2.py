@@ -33,17 +33,14 @@ def save_to_pdf(content, title, file_name):
     return file_name
 
 # Generate Cover Letter
-def generate_cover_letter(name, company_name, job_position):
-    prompt = PromptTemplate(
-        input_variables=["name", "company_name", "job_position"],
-        template=("Write a professional cover letter for {name} applying to a {job_position} "
-                  "position at {company_name}. Ensure it's concise and plain text.")
-    )
-    formatted_prompt = prompt.format(name=name, company_name=company_name, job_position=job_position)
+def generate_cover_letter(name, job_position, company_name, email, linkedin, github, phone):
+    cover_letter_prompt = f"""Write a concise and professional cover letter for {name} applying to a {job_position} position at {company_name}. 
+    Include their email: {email}, phone: {phone}, LinkedIn: {linkedin}, and GitHub: {github}. 
+    Keep it in plain text."""
     
     response = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.3",
-        messages=[{"role": "user", "content": formatted_prompt}],
+        messages=[{"role": "user", "content": cover_letter_prompt}],
     )
     cover_letter = response.choices[0].message.content
 
@@ -52,10 +49,9 @@ def generate_cover_letter(name, company_name, job_position):
     return pdf_path
 
 # Generate Resume
-def generate_resume(name, job_position):
-    resume_prompt = f"""Write a comprehensive resume for {name} applying for a {job_position} position.
-    Use specific keywords and formatting that maximize the chances of the resume being shortlisted.
-    Include relevant skills, experience, and achievements that showcase the candidate's suitability for the role."""
+def generate_resume(name, job_position, github, email, linkedin):
+    resume_prompt = f"""Write a resume for {name} applying for a {job_position} position. Include their email: {email}, Github: {github}, and LinkedIn: {linkedin}. 
+    Highlight relevant skills, experience, and achievements for the job."""
     
     response = client.chat.completions.create(
         model="mistralai/Mistral-7B-Instruct-v0.3",

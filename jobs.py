@@ -11,6 +11,8 @@ def filter_jobs(job_list):
             filtered_list.append(job)
     return filtered_list
 
+from concurrent.futures import ThreadPoolExecutor
+
 def get_jobs(query):
     # Helper function to wrap get_jobs_internshala with the additional argument
     def internshala_wrapper(query):
@@ -23,15 +25,17 @@ def get_jobs(query):
         future_naukri = executor.submit(get_jobs_naukri, query)
         future_internshala = executor.submit(internshala_wrapper, query)
 
-        # Collect the results
-        jobs_indeed = future_indeed.result()
-        jobs_naukri = future_naukri.result()
-        jobs_internshala = future_internshala.result()
+        # Collect the results, ensuring that None is replaced with an empty list
+        jobs_indeed = future_indeed.result() or []
+        jobs_naukri = future_naukri.result() or []
+        jobs_internshala = future_internshala.result() or []
     
     # Combine the results
     combined_jobs = jobs_indeed + jobs_naukri + jobs_internshala
     filtered_jobs = filter_jobs(combined_jobs)
+    
     return filtered_jobs
+
 
 def filter_internships(job_list):
     filtered_list = []
