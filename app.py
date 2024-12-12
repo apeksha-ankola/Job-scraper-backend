@@ -4,6 +4,7 @@ from pymongo.server_api import ServerApi
 from flask_cors import CORS
 from jobs import get_jobs, get_internships
 from llm2 import generate_cover_letter, generate_resume
+from bcrypt import hashpw, gensalt, checkpw
 
 import os
 from dotenv import load_dotenv
@@ -58,14 +59,15 @@ def signup():
         return jsonify({"success": False, "message": "Email already exists"}), 409
     if db.users.find_one({"username": username}):
         return jsonify({"success": False, "message": "Username already exists"}), 409
+    
+    hashed_password = hashpw(password.encode('utf-8'), gensalt())
 
     # Insert the new user into the database
     new_user = {
         "name": name,
         "email": email,
         "username": username,
-        "password": password,
-        
+        "password": hashed_password.decode('utf-8'),        
     }
     db.users.insert_one(new_user)
     print("Entry inserted of username -> ", username)
@@ -89,7 +91,7 @@ def login():
         return jsonify({"success": False, "message": "Incorrect username or password"}), 401
     
     # Validate the password
-    if user["password"] != password:
+    if not checkpw(password.encode('utf-8'), user["password"].encode('utf-8')):
         return jsonify({"success": False, "message": "Incorrect password"}), 401
     
     # Store username in session
@@ -165,6 +167,45 @@ def generate_resume_route():
         return send_file(pdf_path, as_attachment=False, download_name='resume.pdf', mimetype='application/pdf')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.post("/profile")
+def update_profile():
+    # Get data from the request body
+    data = request.json
+    username = data.get("username")
+    phone = data.get("phone")
+    github = data.get("github")
+    linkedin = data.get("linkedin")
+    location = data.get("location")
+
+    # Validate required fields
+    if not all([username, phone, github, linkedin, location]):
+        return jsonify({"success": False, "message": "All fields are required"}), 400
+
+    # Check if the user exists in the database
+    user = db.users.find_one({"username": username})
+
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+
+    # Add or update the profile in the user's data
+    profile = {
+        "phone": phone,
+        "github": github,
+        "linkedin": linkedin,
+        "location": location
+    }
+
+    # Update the user's document with the new profile
+    db.users.update_one(
+        {"username": username},
+        {"$set": {"profile": profile}}
+    )
+
+    # Fetch the updated user document
+    updated_user = db.users.find_one({"username": username}, {"_id": 0})
+
+    return jsonify({"success": True, "message": "Profile updated successfully", "user": updated_user}), 200
 
 
 

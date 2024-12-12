@@ -1,7 +1,6 @@
 from scraper import get_jobs_indeed, get_jobs_naukri, get_jobs_internshala
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
-import json
 
 def filter_jobs(job_list):
     filtered_list = []

@@ -4,9 +4,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import requests
-import time
-import pandas as pd
-
 def get_jobs_indeed(job_query):
     # Initialize the driver
     driver = webdriver.Chrome()
