@@ -190,10 +190,10 @@ def get_job_details(job_link):
     job_data['Job Title'] = role_div.text.strip() if role_div else None
 
     # Extracting the company
-    company_div = soup.find('div', class_='company_and_premium')
+    company_div = soup.find('div', class_='company_name')
     job_data['Company'] = company_div.find('a').get_text(strip=True) if company_div and company_div.find('a') else None
 
-    location_p_tag = soup.find('p', id='location_names')
+    location_p_tag = soup.find('div', id='location_names')
     location_span = location_p_tag.find('span') if location_p_tag else None
     job_data['Location'] = location_span.find('a').get_text() if location_span and location_span.find('a') else None
     
