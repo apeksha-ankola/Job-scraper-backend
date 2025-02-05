@@ -169,11 +169,12 @@ def generate_resume_route():
         email = data.get("email")
         github = data.get("github")
         linkedin = data.get("linkedin")
+        phone = data.get('phone')
 
         if not all([name, job_position]):
             return jsonify({"error": "Missing required fields"}), 400
 
-        pdf_path = generate_resume(name, job_position,email,github,linkedin)
+        pdf_path = generate_resume(name, job_position,email,github,linkedin, phone)
         return send_file(pdf_path, as_attachment=False, download_name='resume.pdf', mimetype='application/pdf')
     except Exception as e:
         return jsonify({"error": str(e)}), 500

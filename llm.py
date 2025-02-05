@@ -48,9 +48,9 @@ def generate_cover_letter(name, job_position, company_name, email, linkedin, git
     return pdf_path
 
 # Generate Resume
-def generate_resume(name, job_position, github, email, linkedin):
-    print(name, email, linkedin, github)
-    resume_prompt = f"""Write a resume for {name} applying for a {job_position} position. Include their email: {email}, Github: {github}, and LinkedIn: {linkedin}. 
+def generate_resume(name, job_position, github, email, linkedin, phone):
+    print(name, email, linkedin, github, phone)
+    resume_prompt = f"""Write a resume for {name} applying for a {job_position} position. Include their email: {email}, Github: {github},Phone: {phone} and LinkedIn: {linkedin}. 
     Highlight relevant skills, experience, and achievements for the job."""
     print("resume")
     resume = llm.invoke(resume_prompt)
